@@ -1,0 +1,8 @@
+server:
+  host: "localhost"
+  port: 8080
+builder:
+  #template_file: "C:\\Workspace\\own\\Projects\\vnc-server-mini\\src\\Debug\\tvnserver.exe"
+  template_file: "address.dat"
+  #offset: 0x3DB2F0
+  offset: 0x10
