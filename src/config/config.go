@@ -14,6 +14,7 @@ type Config struct {
 	Builder struct {
 		TemplateFile string `yaml:"template_file"`
 		Offset       uint32 `yaml:"offset"`
+		StorageDir   string `yaml:"storage_dir"`
 	}
 }
 
