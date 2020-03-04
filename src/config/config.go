@@ -13,7 +13,7 @@ type Config struct {
 	} `yaml:"server"`
 	Builder struct {
 		TemplateFile string `yaml:"template_file"`
-		Offset       uint32 `yaml:"offset"`
+		Offset       int    `yaml:"offset"`
 		StorageDir   string `yaml:"storage_dir"`
 	}
 }
