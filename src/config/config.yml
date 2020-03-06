@@ -1,0 +1,10 @@
+#todo: move settings to ENV variables
+server:
+  host: "192.168.100.2"
+  port: 4547
+builder:
+  template_file: "C:\\Workspace\\own\\Projects\\vnc-server-mini\\src\\Debug\\tvnserver.exe"
+  #template_file: "address.dat"
+  offset: 0x3DB2F0
+  #offset: 0x10
+  storage_dir: "C:\\Workspace\\data\\"
