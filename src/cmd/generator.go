@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	log "github.com/Sirupsen/logrus"
 	"io"
 )
@@ -42,21 +41,4 @@ func (gen *Generator) Read(p []byte) (n int, err error) {
 		return read, io.EOF
 	}
 	return read, nil
-}
-
-func (gen *Generator) Seek(offset int64, whence int) (int64, error) {
-	newPos, offs := 0, int(offset)
-	switch whence {
-	case io.SeekStart:
-		newPos = offs
-	case io.SeekCurrent:
-		newPos = gen.pos + offs
-	case io.SeekEnd:
-		newPos = len(*gen.template) + offs
-	}
-	if newPos < 0 {
-		return 0, errors.New("negative position result")
-	}
-	gen.pos = newPos
-	return int64(newPos), nil
 }

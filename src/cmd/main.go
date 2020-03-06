@@ -5,7 +5,6 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/labstack/echo"
 	"github.com/pkg/errors"
-	"io/ioutil"
 	"net"
 	"net/http"
 )
@@ -15,15 +14,14 @@ func main() {
 	if err != nil {
 		log.Fatalln("Error reading config", err.Error())
 	}
-	log.Info("Obtaining of template from file")
-	templateFile := getTemplate(cfg)
-	log.Info("Template has obtained")
+	factory := getGeneratorFactory(cfg)
 
-	log.Debug("Template length:", len(templateFile))
-	offset := cfg.Builder.Offset
+	launchServer(factory, cfg)
+}
 
+func launchServer(factory generatorFactory, cfg *config.Config) {
 	e := echo.New()
-	e.GET("/:address", func(c echo.Context) error {
+	e.GET("/hostfile/:address", func(c echo.Context) error {
 		pAddress := c.Param("address")
 		e.Logger.Info("Parsing address:", pAddress)
 		ip := net.ParseIP(pAddress)
@@ -33,18 +31,13 @@ func main() {
 			return errors.New("Unable to parse address specified")
 		}
 		insert := []byte{ip[15], ip[14], ip[13], ip[12]}
-		gen := Generator{template: &templateFile, insertOffset: offset, insert: insert}
+		gen := factory.createGenerator(insert)
 		c.Response().Header().Set("Content-Disposition", "Attachment;filename=tvnserver.exe")
 		return c.Stream(http.StatusOK, echo.MIMEOctetStream, &gen)
 	})
-	e.Logger.Fatal(e.Start(":4547"))
-}
-
-func getTemplate(cfg *config.Config) []byte {
-	fileName := cfg.Builder.TemplateFile
-	templateFile, err := ioutil.ReadFile(fileName)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	return templateFile
+	//just for testing
+	e.GET("/", func(c echo.Context) error {
+		return c.String(http.StatusOK, "hello")
+	})
+	e.Logger.Fatal(e.Start(cfg.Server.Host + ":" + cfg.Server.Port))
 }
