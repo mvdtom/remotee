@@ -39,5 +39,10 @@ func launchServer(factory generatorFactory, cfg *config.Config) {
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "hello")
 	})
+	e.GET("/session/:id", func(c echo.Context) error {
+		pId := c.Param("id")
+		e.Logger.Info("Processing session ID:", pId)
+		return c.String(http.StatusOK, "192.168.100.6")
+	})
 	e.Logger.Fatal(e.Start(cfg.Server.Host + ":" + cfg.Server.Port))
 }
